@@ -1,0 +1,760 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: url('0.png') no-repeat center center fixed;
+  background-size: cover;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Header */
+.dashboard-header {
+  background: rgba(186, 4, 4, 0.9);
+  color: white;
+  display: flex;
+  align-items: center;
+  padding: 10px 0 10px 80px;
+  margin-right: -50px;
+  /* extend header background further right */
+}
+
+.dashboard-header .logo {
+  width: 60px;
+  margin-right: 15px;
+}
+
+.dashboard-header h1 {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.dashboard-header p {
+  margin: 2px 0 0;
+  font-size: 11px;
+}
+
+/* Layout container */
+.dashboard-container {
+  flex: 1;
+  display: flex;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 200px;
+  background: rgba(100, 0, 0, 0.9);
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+.sidebar button {
+  background: #424345;
+  color: white;
+  border: none;
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.sidebar button:hover {
+  background: #797979;
+}
+
+/* Main content */
+.main-content {
+  flex: 1;
+  background: rgba(255, 252, 252, 0.85);
+  margin: 20px;
+  border-radius: 8px;
+  padding: 30px;
+  text-align: center;
+}
+
+.main-content h1 {
+  margin-bottom: 30px;
+  color: rgba(100, 0, 0, 0.9);
+  ;
+}
+
+.main-content h2 {
+  margin-bottom: 20px;
+  color: rgba(100, 0, 0, 0.9);
+  ;
+}
+
+/* Statistics Container */
+.stats-container {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+
+.stat-box {
+  background: rgba(146, 1, 1, 0.171);
+  padding: 20px 40px;
+  border-radius: 8px;
+  text-align: center;
+  min-width: 150px;
+}
+
+.stat-box h3 {
+  color: rgba(100, 0, 0, 0.9);
+  ;
+  margin: 0 0 10px 0;
+  font-size: 16px;
+}
+
+.stat-box p {
+  color: rgba(100, 0, 0, 0.9);
+  ;
+  font-size: 28px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.present-box {
+  background: rgba(0, 128, 0, 0.2);
+  border-left: 4px solid #00FF00;
+}
+
+.absent-box {
+  background: rgba(255, 0, 0, 0.2);
+  border-left: 4px solid #FF0000;
+}
+
+/* Content Sections */
+.content-section {
+  background: #424345(81, 81, 81, 0.9);
+  border-radius: 8px;
+  padding: 25px;
+  margin-top: 20px;
+  text-align: left;
+}
+
+.content-section h2 {
+  color: #000000;
+  margin-bottom: 15px;
+  border-bottom: 2px solid #000000;
+  padding-bottom: 10px;
+}
+
+.content-section h3 {
+  color: #000000;
+  margin-top: 25px;
+  margin-bottom: 15px;
+}
+
+.content-section p {
+  font-weight: bold;
+  color: #000000;
+  margin-top: 15px;
+}
+
+/* Form Groups */
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: bold;
+  color: #000000;
+  margin-bottom: 5px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #000000;
+  border-radius: 4px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #000000;
+  box-shadow: 0 0 5px rgba(0, 89, 179, 0.3);
+}
+
+/* Submit Button */
+.submit-btn {
+  background: #800000;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.submit-btn:hover {
+  background: #505050;
+}
+
+/* Members List */
+.members-list {
+  list-style-type: none;
+  padding: 0;
+  margin-top: 15px;
+}
+
+.members-list li {
+  background: rgba(0, 40, 100, 0.1);
+  padding: 12px;
+  margin-bottom: 8px;
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #851010;
+  font-weight: bold;
+}
+
+.members-list li span {
+  flex: 1;
+}
+
+.delete-btn {
+  background: #cc0000;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.delete-btn:hover {
+  background: #ff0000;
+}
+
+/* LRN Attendance Section */
+.lrn-attendance {
+  background: rgba(0, 128, 0, 0.1);
+  border: 2px solid #00FF00;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.lrn-attendance h3 {
+  color: #006600;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.lrn-input-group {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 10px;
+  margin-right: 28px;
+}
+
+.lrn-input-group input {
+  padding: 12px;
+  border: 2px solid #00FF00;
+  border-radius: 4px;
+  font-size: 16px;
+  width: 200px;
+  text-align: center;
+}
+
+.lrn-input-group input:focus {
+  outline: none;
+  border-color: #00AA00;
+  box-shadow: 0 0 5px rgba(0, 170, 0, 0.3);
+}
+
+.lrn-status {
+  margin-top: 10px;
+  padding: 8px;
+  border-radius: 4px;
+  text-align: center;
+  font-weight: bold;
+  min-height: 20px;
+}
+
+.lrn-status.success {
+  background: rgba(0, 255, 0, 0.2);
+  color: #006600;
+  border: 1px solid #00FF00;
+}
+
+.lrn-status.error {
+  background: rgba(255, 0, 0, 0.2);
+  color: #cc0000;
+  border: 1px solid #FF0000;
+}
+
+.lrn-status.warning {
+  background: rgba(255, 165, 0, 0.2);
+  color: #cc6600;
+  border: 1px solid #FFA500;
+}
+
+.lrn-note {
+  color: #006600;
+  font-size: 14px;
+  text-align: center;
+  margin: 0;
+  font-style: italic;
+}
+
+/* OR Divider */
+.or-divider {
+  text-align: center;
+  margin: 20px 0;
+  position: relative;
+}
+
+.or-divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #ccc;
+}
+
+.or-divider span {
+  background: rgba(255, 252, 252, 0.85);
+  padding: 0 15px;
+  color: #666;
+  font-weight: bold;
+}
+
+/* Attendance Controls */
+.attendance-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.attendance-controls select {
+  padding: 10px;
+  border: 1px solid #004080;
+  border-radius: 4px;
+  font-size: 14px;
+  background: white;
+}
+
+.attendance-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.present-btn {
+  background: #008000;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.present-btn:hover {
+  background: #00a000;
+}
+
+.absent-btn {
+  background: #cc0000;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.absent-btn:hover {
+  background: #ff0000;
+}
+
+/* Attendance Actions */
+.attendance-actions {
+  background: rgba(255, 0, 0, 0.1);
+  border: 2px solid #FF0000;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.auto-absent-btn {
+  background: #FF0000;
+  color: white;
+  border: 2px solid #AA0000;
+  padding: 12px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.auto-absent-btn:hover {
+  background: #AA0000;
+}
+
+.action-note {
+  color: #cc0000;
+  font-size: 14px;
+  margin: 0;
+  font-style: italic;
+}
+
+/* Attendance List */
+.attendance-list {
+  list-style-type: none;
+  padding: 0;
+  margin-top: 15px;
+}
+
+.attendance-list li {
+  padding: 10px;
+  margin-bottom: 8px;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+.present-record {
+  background: rgba(0, 128, 0, 0.2);
+  color: #006600;
+  border-left: 4px solid #008000;
+}
+
+.absent-record {
+  background: rgba(204, 0, 0, 0.2);
+  color: #cc0000;
+  border-left: 4px solid #cc0000;
+}
+
+/* Filter Controls */
+.filter-controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.filter-controls label {
+  font-weight: bold;
+  color: #000000;
+}
+
+.filter-controls input[type="date"] {
+  padding: 8px;
+  border: 1px solid #000000;
+  border-radius: 4px;
+}
+
+.filter-controls button {
+  background: #000000;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.filter-controls button:hover {
+  background: #000000;
+}
+
+/* Chart Container */
+.chart-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px 0;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  min-height: 400px;
+}
+
+.chart-container canvas {
+  max-width: 100%;
+  max-height: 400px;
+  width: auto !important;
+  height: auto !important;
+}
+
+/* Report Options */
+.report-options {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.report-options button {
+  color: #3f3f3f;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.report-options button:hover {
+  background: #000000;
+}
+
+/* Report Output */
+.report-output {
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid #000000;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 15px;
+}
+
+.report-output h3 {
+  color: #000000;
+  border-bottom: 1px solid #004080;
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+}
+
+.report-output p {
+  color: #000000;
+  font-size: 16px;
+  margin: 10px 0;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  body {
+    font-size: 14px;
+  }
+
+  .dashboard-header {
+    flex-direction: column;
+    text-align: center;
+    padding: 15px;
+  }
+
+  .dashboard-header .logo {
+    width: 60px;
+    margin-right: 0;
+    margin-bottom: 10px;
+  }
+
+  .dashboard-header h1 {
+    font-size: 18px;
+    margin-bottom: 5px;
+  }
+
+  .dashboard-header p {
+    font-size: 12px;
+  }
+
+  .dashboard-container {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    background: rgba(100, 0, 0, 0.95);
+    position: fixed;
+    top: 0;
+    left: -100%;
+    height: 100vh;
+    z-index: 1000;
+    transition: left 0.3s ease;
+    padding: 80px 20px 20px;
+    box-sizing: border-box;
+  }
+
+  .sidebar.active {
+    left: 0;
+  }
+
+  .sidebar button {
+    width: 100%;
+    padding: 15px;
+    font-size: 16px;
+    margin: 5px 0;
+  }
+
+  .main-content {
+    margin: 0;
+    padding: 20px 15px;
+    width: 100%;
+  }
+
+  .main-content h1 {
+    font-size: 20px;
+    margin-bottom: 20px;
+  }
+
+  .stats-container {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .stat-box {
+    padding: 15px 20px;
+    min-width: unset;
+  }
+
+  .stat-box h3 {
+    font-size: 14px;
+  }
+
+  .stat-box p {
+    font-size: 24px;
+  }
+
+  .content-section {
+    padding: 20px 15px;
+  }
+
+  .form-group input {
+    padding: 12px;
+    font-size: 16px;
+    /* Prevents zoom on iOS */
+  }
+
+  .submit-btn {
+    width: 100%;
+    padding: 15px;
+    font-size: 16px;
+  }
+
+  .lrn-input-group {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .lrn-input-group input {
+    width: 100%;
+    text-align: center;
+  }
+
+  .attendance-controls {
+    flex-direction: column;
+  }
+
+  .attendance-buttons {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .present-btn,
+  .absent-btn {
+    width: 100%;
+    padding: 15px;
+    font-size: 16px;
+  }
+
+  .auto-absent-btn {
+    width: 100%;
+    padding: 15px;
+    font-size: 16px;
+  }
+
+  .filter-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .filter-controls button {
+    padding: 12px;
+    font-size: 16px;
+  }
+
+  .chart-container {
+    min-height: 300px;
+    padding: 15px;
+  }
+
+  .chart-container canvas {
+    max-width: 100% !important;
+    max-height: 300px !important;
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  .report-options {
+    flex-direction: column;
+  }
+
+  .report-options button {
+    width: 100%;
+    padding: 15px;
+    font-size: 16px;
+  }
+
+  .members-list li {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .delete-btn {
+    align-self: flex-end;
+    padding: 8px 15px;
+  }
+
+  .attendance-list li {
+    padding: 12px;
+    font-size: 14px;
+  }
+}
+
+/* Hamburger Menu */
+.hamburger-menu {
+  display: none;
+  position: fixed;
+  top: 15px;
+  right: 15px;
+  z-index: 1001;
+  background: rgba(186, 4, 4, 0.9);
+  border: none;
+  color: white;
+  font-size: 24px;
+  padding: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .hamburger-menu {
+    display: block;
+  }
+}
+
+/* Overlay for mobile sidebar */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+.sidebar-overlay.active {
+  display: block;
+}

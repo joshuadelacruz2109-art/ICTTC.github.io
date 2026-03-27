@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Club Attendance - ICTTC</title>
+  <link rel="stylesheet" href="ICTTC.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+  <!-- Header -->
+  <header class="dashboard-header">
+<img src="ICT.png" alt="Arellano University ICT Logo" class="logo" loading="lazy" style="max-width: 100%; height: auto;">
+    <div class="header-text">
+      <h1>ARELLANO UNIVERSITY<br>ELISA ESGUERRA CAMPUS</h1>
+      <p>ICTTC CLUB ATTENDANCE MONITORING</p>
+    </div>
+    <button class="hamburger-menu" onclick="toggleSidebar()">&#9776;</button>
+  </header>
+
+  <!-- Mobile Sidebar Overlay -->
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+  <!-- Layout -->
+  <div class="dashboard-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <button onclick="showSection('add-member')">Add Member</button>
+      <button onclick="showSection('record-attendance')">Record Attendance</button>
+      <button onclick="showSection('view-attendance')">View Attendance</button>
+      <button onclick="showSection('reports')">Reports</button>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main-content">
+      <h1>CLUB ATTENDANCE MONITORING SYSTEM</h1>
+
+      <!-- Statistics Section -->
+      <div class="stats-container">
+        <div class="stat-box">
+          <h3>Total Members</h3>
+          <p id="totalMembers">0</p>
+        </div>
+        <div class="stat-box present-box">
+          <h3>Present Today</h3>
+          <p id="presentToday">0</p>
+        </div>
+        <div class="stat-box absent-box">
+          <h3>Absent Today</h3>
+          <p id="absentToday">0</p>
+        </div>
+      </div>
+
+      <!-- Add Member Section -->
+      <div id="add-member-section" class="content-section">
+        <h2>Add New Member</h2>
+        <form id="add-member-form">
+          <div class="form-group">
+            <label for="memberName">Full Name:</label>
+            <input type="text" id="memberName" placeholder="Enter full name" required>
+          </div>
+          <div class="form-group">
+            <label for="memberId">LRN:</label>
+            <input type="text" id="memberId" placeholder="Enter LRN" required>
+          </div>
+          <div class="form-group">
+            <label for="memberCourse">Section:</label>
+            <input type="text" id="memberCourse" placeholder="Enter section" required>
+          </div>
+          <button type="submit" class="submit-btn">Add Member</button>
+        </form>
+
+        <h3>Club Members</h3>
+        <ul id="membersList" class="members-list"></ul>
+      </div>
+
+      <!-- Record Attendance Section -->
+      <div id="record-attendance-section" class="content-section" style="display:none;">
+        <h2>Record Today's Attendance</h2>
+
+        <!-- LRN Input Section -->
+        <div class="lrn-attendance">
+          <h3>Quick Attendance by LRN</h3>
+          <div class="lrn-input-group">
+            <input type="text" id="lrnInput" placeholder="Enter your LRN" maxlength="12">
+            <div id="lrnStatus" class="lrn-status"></div>
+          </div>
+          <p class="lrn-note">Enter your LRN to automatically record attendance. Must be done before 6:00 PM.</p>
+        </div>
+
+        <div class="or-divider">
+          <span>OR</span>
+        </div>
+
+
+        <h3>Today's Attendance Records</h3>
+        <div class="attendance-actions">
+          <button onclick="autoMarkAbsentMembers()" class="auto-absent-btn">Auto-Mark Absent (6:00 PM)</button>
+          <p class="action-note">Click this button at 6:00 PM to automatically mark all unregistered members as absent.
+          </p>
+        </div>
+        <ul id="todayAttendanceList" class="attendance-list"></ul>
+      </div>
+
+      <!-- View Attendance Section -->
+      <div id="view-attendance-section" class="content-section" style="display:none;">
+        <h2>View Attendance History</h2>
+
+        <div class="filter-controls">
+          <label>Filter by Date:</label>
+          <input type="date" id="filterDate">
+          <button onclick="filterAttendance()">Filter</button>
+          <button onclick="showAllAttendance()">Show All</button>
+        </div>
+
+        <!-- Attendance Chart -->
+        <div class="chart-container">
+          <canvas id="attendanceChart"></canvas>
+        </div>
+
+        <ul id="attendanceHistoryList" class="attendance-list"></ul>
+      </div>
+
+      <!-- Reports Section -->
+      <div id="reports-section" class="content-section" style="display:none;">
+        <h2>Attendance Reports</h2>
+
+        <div class="report-options">
+          <button onclick="generateDailyReport()">Daily Report</button>
+          <button onclick="generateMonthlyReport()">Monthly Report</button>
+          <button onclick="generateMemberReport()">Member Report</button>
+        </div>
+
+        <div id="reportOutput" class="report-output"></div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // ====== Utility Functions ======
+    let attendanceChart; // Global chart variable
+    function getMembers() {
+      return JSON.parse(localStorage.getItem("clubMembers")) || [];
+    }
+
+    function setMembers(members) {
+      localStorage.setItem("clubMembers", JSON.stringify(members));
+    }
+
+    function getAttendance() {
+      return JSON.parse(localStorage.getItem("clubAttendance")) || [];
+    }
+
+    function setAttendance(attendance) {
+      localStorage.setItem("clubAttendance", JSON.stringify(attendance));
+    }
+
+    function getTodayDate() {
+      return new Date().toISOString().split('T')[0];
+    }
+
+    // ====== Section Navigation ======
+    function showSection(section) {
+      const sections = ['add-member', 'record-attendance', 'view-attendance', 'reports'];
+      sections.forEach(s => {
+        document.getElementById(s + '-section').style.display = (s === section) ? 'block' : 'none';
+      });
+
+      // Close mobile sidebar when navigating
+      closeSidebar();
+
+      if (section === 'record-attendance') {
+        updateMemberSelect();
+        displayTodayAttendance();
+        document.getElementById('lrnInput').value = ''; // Clear LRN input
+        document.getElementById('lrnStatus').className = 'lrn-status'; // Clear status
+        document.getElementById('lrnStatus').textContent = '';
+      } else if (section === 'view-attendance') {
+        displayAllAttendance();
+        renderAttendanceChart();
+      } else if (section === 'add-member') {
+        displayMembers();
+      }
+
+      updateStats();
+    }
+
+    // ====== Mobile Sidebar Toggle ======
+    function toggleSidebar() {
+      const sidebar = document.querySelector('.sidebar');
+      const overlay = document.getElementById('sidebarOverlay');
+
+      sidebar.classList.toggle('active');
+      overlay.classList.toggle('active');
+    }
+
+    function closeSidebar() {
+      const sidebar = document.querySelector('.sidebar');
+      const overlay = document.getElementById('sidebarOverlay');
+
+      sidebar.classList.remove('active');
+      overlay.classList.remove('active');
+    }
+
+    // ====== Statistics ======
+    function updateStats() {
+      const members = getMembers();
+      const attendance = getAttendance();
+      const today = getTodayDate();
+
+      const todayRecords = attendance.filter(a => a.date === today);
+      const presentToday = todayRecords.filter(a => a.status === 'present').length;
+      const absentToday = todayRecords.filter(a => a.status === 'absent').length;
+
+      document.getElementById('totalMembers').textContent = members.length;
+      document.getElementById('presentToday').textContent = presentToday;
+      document.getElementById('absentToday').textContent = absentToday;
+    }
+
+    // ====== Add Member ======
+    document.getElementById('add-member-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const name = document.getElementById('memberName').value.trim();
+      const studentId = document.getElementById('memberId').value.trim();
+      const course = document.getElementById('memberCourse').value.trim();
+
+      if (!name || !studentId || !course) {
+        alert('Please fill in all fields');
+        return;
+      }
+
+      const members = getMembers();
+
+      // Check if member already exists
+      if (members.some(m => m.studentId === studentId)) {
+        alert('Member with this Student ID already exists!');
+        return;
+      }
+
+      const newMember = {
+        id: Date.now(),
+        name: name,
+        studentId: studentId,
+        course: course,
+        dateAdded: getTodayDate()
+      };
+
+      members.push(newMember);
+      setMembers(members);
+
+      alert('Member added successfully!');
+      this.reset();
+      displayMembers();
+      updateStats();
+    });
+
+    function displayMembers() {
+      const members = getMembers();
+      const list = document.getElementById('membersList');
+      list.innerHTML = '';
+
+      if (members.length === 0) {
+        list.innerHTML = '<li>No members added yet.</li>';
+        return;
+      }
+
+      members.forEach((member, index) => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <span><strong>${member.name}</strong> - ID: ${member.studentId} - ${member.course}</span>
+          <button onclick="removeMember(${member.id})" class="delete-btn">Remove</button>
+        `;
+        list.appendChild(li);
+      });
+    }
+
+    function removeMember(id) {
+      if (!confirm('Are you sure you want to remove this member?')) return;
+
+      let members = getMembers();
+      members = members.filter(m => m.id !== id);
+      setMembers(members);
+
+      displayMembers();
+      updateStats();
+    }
+
+    // ====== Record Attendance ======
+    function updateMemberSelect() {
+      const members = getMembers();
+      const select = document.getElementById('memberSelect');
+      select.innerHTML = '<option value="">-- Select Member --</option>';
+
+      members.forEach(member => {
+        const option = document.createElement('option');
+        option.value = member.studentId;
+        option.textContent = `${member.name} - ${member.studentId}`;
+        select.appendChild(option);
+      });
+    }
+
+    function markAttendance(status) {
+      const select = document.getElementById('memberSelect');
+      const studentId = select.value;
+
+      if (!studentId) {
+        alert('Please select a member first');
+        return;
+      }
+
+      const members = getMembers();
+      const member = members.find(m => m.studentId === studentId);
+
+      if (!member) {
+        alert('Member not found');
+        return;
+      }
+
+      const attendance = getAttendance();
+      const today = getTodayDate();
+
+      // Check if already recorded today
+      const existingIndex = attendance.findIndex(a => a.studentId === studentId && a.date === today);
+
+      if (existingIndex !== -1) {
+        if (!confirm('Attendance already recorded for today. Do you want to update it?')) {
+          return;
+        }
+        attendance[existingIndex].status = status;
+        attendance[existingIndex].time = new Date().toLocaleTimeString();
+      } else {
+        attendance.push({
+          studentId: studentId,
+          name: member.name,
+          date: today,
+          status: status,
+          time: new Date().toLocaleTimeString()
+        });
+      }
+
+      setAttendance(attendance);
+      alert(`Attendance marked as ${status}`);
+      select.value = '';
+      displayTodayAttendance();
+      updateStats();
+    }
+
+    function displayTodayAttendance() {
+      const attendance = getAttendance();
+      const today = getTodayDate();
+      const todayRecords = attendance.filter(a => a.date === today);
+      const list = document.getElementById('todayAttendanceList');
+      list.innerHTML = '';
+
+      if (todayRecords.length === 0) {
+        list.innerHTML = '<li>No attendance recorded for today.</li>';
+        return;
+      }
+
+      todayRecords.forEach(record => {
+        const li = document.createElement('li');
+        li.className = record.status === 'present' ? 'present-record' : 'absent-record';
+        li.innerHTML = `
+          <span>${record.name} - ${record.status.toUpperCase()} - ${record.time}</span>
+        `;
+        list.appendChild(li);
+      });
+    }
+
+    // ====== LRN-based Attendance Recording ======
+    function recordAttendanceByLRN() {
+      const lrnInput = document.getElementById('lrnInput');
+      const statusDiv = document.getElementById('lrnStatus');
+      const studentId = lrnInput.value.trim();
+
+      // Clear previous status
+      statusDiv.className = 'lrn-status';
+      statusDiv.textContent = '';
+
+      if (!studentId) {
+        return; // Don't show error for empty input
+      }
+
+      // Check if LRN is valid length (assuming LRN should be at least 8 characters)
+      if (studentId.length < 8) {
+        statusDiv.className = 'lrn-status warning';
+        statusDiv.textContent = 'Please enter a complete LRN';
+        return;
+      }
+
+      // Check if it's past 6 PM
+      const now = new Date();
+      const currentHour = now.getHours();
+      const currentMinute = now.getMinutes();
+
+      const members = getMembers();
+      const member = members.find(m => m.studentId === studentId);
+
+      if (!member) {
+        statusDiv.className = 'lrn-status error';
+        statusDiv.textContent = 'LRN not found. Please check your LRN.';
+        return;
+      }
+
+      const attendance = getAttendance();
+      const today = getTodayDate();
+
+      // Check if already recorded today
+      const existingIndex = attendance.findIndex(a => a.studentId === studentId && a.date === today);
+
+      if (existingIndex !== -1) {
+        statusDiv.className = 'lrn-status warning';
+        statusDiv.textContent = 'Your attendance has already been recorded for today.';
+        lrnInput.value = '';
+        setTimeout(() => {
+          statusDiv.className = 'lrn-status';
+          statusDiv.textContent = '';
+        }, 3000);
+        return;
+      }
+
+      // Record attendance based on time
+      if (currentHour > 18 || (currentHour === 18 && currentMinute > 0)) {
+        // Past 6 PM - mark as absent
+        attendance.push({
+          studentId: studentId,
+          name: member.name,
+          date: today,
+          status: 'absent',
+          time: new Date().toLocaleTimeString()
+        });
+        setAttendance(attendance);
+        statusDiv.className = 'lrn-status error';
+        statusDiv.textContent = `Sorry ${member.name}, attendance time has expired. Marked as absent.`;
+        displayTodayAttendance();
+        updateStats();
+      } else {
+        // Before 6 PM - mark as present
+        attendance.push({
+          studentId: studentId,
+          name: member.name,
+          date: today,
+          status: 'present',
+          time: new Date().toLocaleTimeString()
+        });
+        setAttendance(attendance);
+        statusDiv.className = 'lrn-status success';
+        statusDiv.textContent = `Welcome ${member.name}! Attendance recorded as present.`;
+        displayTodayAttendance();
+        updateStats();
+      }
+
+      // Clear input after successful recording
+      lrnInput.value = '';
+
+      // Clear status after 3 seconds
+      setTimeout(() => {
+        statusDiv.className = 'lrn-status';
+        statusDiv.textContent = '';
+      }, 3000);
+    }
+
+    // ====== Auto-mark absent for members who haven't recorded by 6 PM ======
+    function autoMarkAbsentMembers() {
+      const members = getMembers();
+      const attendance = getAttendance();
+      const today = getTodayDate();
+
+      // Get members who haven't recorded attendance today
+      const todayRecords = attendance.filter(a => a.date === today);
+      const recordedStudentIds = todayRecords.map(r => r.studentId);
+
+      const absentMembers = members.filter(member => !recordedStudentIds.includes(member.studentId));
+
+      if (absentMembers.length === 0) {
+        return; // All members have recorded attendance
+      }
+
+      // Mark absent members
+      absentMembers.forEach(member => {
+        attendance.push({
+          studentId: member.studentId,
+          name: member.name,
+          date: today,
+          status: 'absent',
+          time: 'Auto-marked at 6:00 PM'
+        });
+      });
+
+      setAttendance(attendance);
+      displayTodayAttendance();
+      updateStats();
+
+      alert(`${absentMembers.length} member(s) have been automatically marked as absent for not recording attendance by 6:00 PM.`);
+    }
+
+    function markAbsentByLRN(studentId) {
+      const members = getMembers();
+      const member = members.find(m => m.studentId === studentId);
+
+      if (!member) return;
+
+      const attendance = getAttendance();
+      const today = getTodayDate();
+
+      // Check if already recorded
+      const existingIndex = attendance.findIndex(a => a.studentId === studentId && a.date === today);
+
+      if (existingIndex !== -1) {
+        return; // Already recorded
+      }
+
+      attendance.push({
+        studentId: studentId,
+        name: member.name,
+        date: today,
+        status: 'absent',
+        time: new Date().toLocaleTimeString()
+      });
+
+      setAttendance(attendance);
+      displayTodayAttendance();
+      updateStats();
+    }
+
+    // ====== View Attendance ======
+    function displayAllAttendance() {
+      const attendance = getAttendance();
+      const list = document.getElementById('attendanceHistoryList');
+      list.innerHTML = '';
+
+      if (attendance.length === 0) {
+        list.innerHTML = '<li>No attendance records found.</li>';
+        return;
+      }
+
+      // Sort by date (most recent first)
+      const sorted = [...attendance].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      sorted.forEach(record => {
+        const li = document.createElement('li');
+        li.className = record.status === 'present' ? 'present-record' : 'absent-record';
+        li.innerHTML = `<span>${record.name} - ${record.date} - ${record.status.toUpperCase()}</span>`;
+        list.appendChild(li);
+      });
+    }
+
+    function filterAttendance() {
+      const filterDate = document.getElementById('filterDate').value;
+      if (!filterDate) {
+        alert('Please select a date to filter');
+        return;
+      }
+
+      const attendance = getAttendance();
+      const filtered = attendance.filter(a => a.date === filterDate);
+      const list = document.getElementById('attendanceHistoryList');
+      list.innerHTML = '';
+
+      if (filtered.length === 0) {
+        list.innerHTML = '<li>No attendance records for this date.</li>';
+        return;
+      }
+
+      filtered.forEach(record => {
+        const li = document.createElement('li');
+        li.className = record.status === 'present' ? 'present-record' : 'absent-record';
+        li.innerHTML = `
+          <span>${record.name} - ${record.status.toUpperCase()} - ${record.time}</span>
+        `;
+        list.appendChild(li);
+      });
+
+      renderAttendanceChart(filtered);
+    }
+
+    function showAllAttendance() {
+      document.getElementById('filterDate').value = '';
+      displayAllAttendance();
+      renderAttendanceChart();
+    }
+
+    // ====== Render Attendance Donut Chart ======
+    function renderAttendanceChart(attendanceData = null) {
+      const attendance = attendanceData || getAttendance();
+      const present = attendance.filter(a => a.status === 'present').length;
+      const absent = attendance.filter(a => a.status === 'absent').length;
+
+      const ctx = document.getElementById('attendanceChart').getContext('2d');
+
+      // Destroy existing chart if it exists
+      if (attendanceChart) {
+        attendanceChart.destroy();
+      }
+
+      // Handle empty data
+      const data = [present, absent];
+      const hasData = data.some(value => value > 0);
+
+      attendanceChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Present', 'Absent'],
+          datasets: [{
+            data: hasData ? data : [1, 1], // Show placeholder if no data
+            backgroundColor: hasData ? [
+              '#00FF00', // Pure green for present
+              '#FF0000'  // Pure red for absent
+            ] : [
+              '#E0E0E0', // Gray placeholder
+              '#E0E0E0'
+            ],
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                padding: 20,
+                usePointStyle: true
+              }
+            },
+            title: {
+              display: true,
+              text: hasData ? 'Attendance Summary' : 'No Attendance Data',
+              font: {
+                size: 16
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: function (context) {
+                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                  const percentage = total > 0 ? ((context.parsed / total) * 100).toFixed(1) : 0;
+                  return `${context.label}: ${context.parsed} (${percentage}%)`;
+                }
+              }
+            }
+          },
+          layout: {
+            padding: {
+              top: 20,
+              bottom: 20
+            }
+          }
+        }
+      });
+    }
+
+    // ====== Reports ======
+    function generateDailyReport() {
+      const attendance = getAttendance();
+      const today = getTodayDate();
+      const todayRecords = attendance.filter(a => a.date === today);
+
+      const present = todayRecords.filter(a => a.status === 'present').length;
+      const absent = todayRecords.filter(a => a.status === 'absent').length;
+      const total = todayRecords.length;
+
+      const output = document.getElementById('reportOutput');
+      output.innerHTML = `
+        <h3>Daily Report - ${today}</h3>
+        <p>Total Records: ${total}</p>
+        <p>Present: ${present}</p>
+        <p>Absent: ${absent}</p>
+        <p>Attendance Rate: ${total > 0 ? ((present / total) * 100).toFixed(1) : 0}%</p>
+      `;
+    }
+
+    function generateMonthlyReport() {
+      const attendance = getAttendance();
+      const now = new Date();
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+
+      const monthRecords = attendance.filter(a => a.date >= monthStart);
+      const present = monthRecords.filter(a => a.status === 'present').length;
+      const absent = monthRecords.filter(a => a.status === 'absent').length;
+      const total = monthRecords.length;
+
+      const monthNames = ["January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"];
+
+      const output = document.getElementById('reportOutput');
+      output.innerHTML = `
+        <h3>Monthly Report - ${monthNames[now.getMonth()]} ${now.getFullYear()}</h3>
+        <p>Total Records: ${total}</p>
+        <p>Present: ${present}</p>
+        <p>Absent: ${absent}</p>
+        <p>Attendance Rate: ${total > 0 ? ((present / total) * 100).toFixed(1) : 0}%</p>
+      `;
+    }
+
+    function generateMemberReport() {
+      const members = getMembers();
+      const attendance = getAttendance();
+
+      let output = '<h3>Member Attendance Summary</h3>';
+
+      if (members.length === 0) {
+        output += '<p>No members found.</p>';
+      } else {
+        members.forEach(member => {
+          const memberRecords = attendance.filter(a => a.studentId === member.studentId);
+          const present = memberRecords.filter(a => a.status === 'present').length;
+          const total = memberRecords.length;
+          const rate = total > 0 ? ((present / total) * 100).toFixed(1) : 0;
+
+          output += `<p><strong>${member.name}</strong> - ${present}/${total} present (${rate}%)</p>`;
+        });
+      }
+
+      document.getElementById('reportOutput').innerHTML = output;
+    }
+
+    // ====== Initialize ======
+    document.addEventListener('DOMContentLoaded', function () {
+      updateStats();
+      displayMembers();
+
+      // Add input listener for LRN auto-validation
+      const lrnInput = document.getElementById('lrnInput');
+      lrnInput.addEventListener('input', function () {
+        // Debounce the validation to avoid too many calls
+        clearTimeout(lrnInput.validationTimeout);
+        lrnInput.validationTimeout = setTimeout(recordAttendanceByLRN, 500);
+      });
+
+      // Also keep Enter key support for immediate validation
+      lrnInput.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+          clearTimeout(lrnInput.validationTimeout);
+          recordAttendanceByLRN();
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>
