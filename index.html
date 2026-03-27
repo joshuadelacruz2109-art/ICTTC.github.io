@@ -739,6 +739,81 @@
           recordAttendanceByLRN();
         }
       });
+      
+      // ====== NFC Auto-Type Integration ======
+      let nfcEnabled = false;
+      
+      // Update showSection to init NFC when Record Attendance is shown
+      const originalShowSection = showSection;
+      showSection = async function(section) {
+        originalShowSection(section);
+        
+        if (section === 'record-attendance' && 'NDEFReader' in window) {
+          try {
+            const ndef = new NDEFReader();
+            await ndef.scan({ signal: AbortSignal.timeout(5000) }).catch(() => {
+              console.log('NFC scan cancelled or permission denied');
+            });
+          } catch (error) {
+            console.log('NFC not available:', error);
+          }
+        }
+      };
+      
+      // Global NFC reader event listener
+      if ('NDEFReader' in window) {
+        const ndef = new NDEFReader();
+        ndef.addEventListener('reading', (event) => {
+          handleNFCReading(event.message.records);
+        });
+      }
+      
+      function handleNFCReading(records) {
+        for (const record of records) {
+          if (record.recordType === 'text') {
+            const decoder = new TextDecoder(record.encoding);
+            let lrn = decoder.decode(record.data).trim();
+            
+            // Extract numeric LRN (common format)
+            lrn = lrn.replace(/[^0-9]/g, '');
+            
+            // Validate LRN length
+            if (lrn.length >= 8 && lrn.length <= 12) {
+              const lrnInput = document.getElementById('lrnInput');
+              const statusDiv = document.getElementById('lrnStatus');
+              
+              if (lrnInput && statusDiv) {
+                lrnInput.value = lrn;
+                statusDiv.className = 'lrn-status success';
+                statusDiv.textContent = `🪪 NFC Card Read: LRN ${lrn}`;
+                
+                // Trigger the existing input handler (debounce will process)
+                lrnInput.dispatchEvent(new Event('input', { bubbles: true }));
+                
+                // Clear status after 2.5s (before debounce processes)
+                setTimeout(() => {
+                  if (statusDiv.textContent.includes('NFC Card Read')) {
+                    statusDiv.className = 'lrn-status';
+                    statusDiv.textContent = '';
+                  }
+                }, 2500);
+              }
+              return;
+            }
+          }
+        }
+        
+        // Show warning if no valid LRN found
+        const statusDiv = document.getElementById('lrnStatus');
+        if (statusDiv) {
+          statusDiv.className = 'lrn-status warning';
+          statusDiv.textContent = 'NFC card read but no valid LRN found';
+          setTimeout(() => {
+            statusDiv.className = 'lrn-status';
+            statusDiv.textContent = '';
+          }, 3000);
+        }
+      }
     });
   </script>
 </body>
