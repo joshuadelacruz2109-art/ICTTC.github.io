@@ -187,7 +187,7 @@ body {
 }
 
 /* Submit Button */
-.submit-btn {
+.submit-btn, .nfc-write-btn {
   background: #800000;
   color: white;
   border: none;
@@ -196,6 +196,14 @@ body {
   cursor: pointer;
   font-weight: bold;
   font-size: 14px;
+}
+
+.nfc-write-btn {
+  background: linear-gradient(45deg, #0066cc, #0080ff);
+}
+
+.nfc-write-btn:hover {
+  background: linear-gradient(45deg, #0052a3, #0066cc);
 }
 
 .submit-btn:hover {

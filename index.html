@@ -63,7 +63,8 @@
           </div>
           <div class="form-group">
             <label for="memberId">LRN:</label>
-            <input type="text" id="memberId" placeholder="Enter LRN" required>
+            <input type="text" id="memberId" placeholder="Enter LRN (12 digits)" required maxlength="12">
+            <button type="button" id="writeNfcBtn" class="nfc-write-btn" onclick="writeLRNToNFC()" style="margin-top: 5px; width: 100%;">🪪 Write LRN to NFC Card</button>
           </div>
           <div class="form-group">
             <label for="memberCourse">Section:</label>
@@ -71,6 +72,8 @@
           </div>
           <button type="submit" class="submit-btn">Add Member</button>
         </form>
+
+        <div id="nfcWriteStatus" style="margin-top: 10px; padding: 10px; border-radius: 4px; display: none;"></div>
 
         <h3>Club Members</h3>
         <ul id="membersList" class="members-list"></ul>
@@ -719,13 +722,61 @@
       document.getElementById('reportOutput').innerHTML = output;
     }
 
-    // ====== Initialize ======
-    document.addEventListener('DOMContentLoaded', function () {
-      updateStats();
-      displayMembers();
+// ====== NFC Write Function (User Request) ======
+async function writeLRNToNFC() {
+  const memberId = document.getElementById('memberId').value.trim();
+  const statusDiv = document.getElementById('nfcWriteStatus');
+  
+  if (!memberId || memberId.length < 8) {
+    alert('Please enter valid LRN first (8-12 digits)');
+    return;
+  }
+  
+  if (!('NDEFReader' in window)) {
+    alert('Web NFC not supported in this browser');
+    return;
+  }
+  
+  statusDiv.style.display = 'block';
+  statusDiv.className = 'lrn-status warning';
+  statusDiv.textContent = 'Hold NFC card to device...';
+  
+  try {
+    const ndef = new NDEFReader();
+    await ndef.scan();
+    console.log("Scan started successfully.");
+    
+    ndef.onreading = async () => {
+      try {
+        await ndef.write({
+          records: [{
+            recordType: "text",
+            data: memberId  // Writes exact LRN
+          }]
+        });
+        statusDiv.className = 'lrn-status success';
+        statusDiv.textContent = `✅ LRN ${memberId} written to NFC card!`;
+        console.log("LRN written to NFC tag!");
+      } catch (error) {
+        statusDiv.className = 'lrn-status error';
+        statusDiv.textContent = `❌ Write failed: ${error.message}`;
+        console.error("Write failed:", error);
+      }
+    };
+  } catch (error) {
+    statusDiv.className = 'lrn-status error';
+    statusDiv.textContent = `❌ Scan error: ${error.message}`;
+    console.error("Error starting scan:", error);
+  }
+}
 
-      // Add input listener for LRN auto-validation
-      const lrnInput = document.getElementById('lrnInput');
+// ====== Initialize ======
+document.addEventListener('DOMContentLoaded', function () {
+  updateStats();
+  displayMembers();
+
+  // Add input listener for LRN auto-validation
+  const lrnInput = document.getElementById('lrnInput');
       lrnInput.addEventListener('input', function () {
         // Debounce the validation to avoid too many calls
         clearTimeout(lrnInput.validationTimeout);
